@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Usage Impact Dashboard - Youth Study Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+
+        .filter-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .filter-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:hover {
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .chart-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .chart-insight {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #495057;
+            line-height: 1.7;
+        }
+
+        .chart-insight strong {
+            color: #667eea;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+            font-size: 0.9em;
+            border-top: 1px solid #e9ecef;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .filter-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Usage Impact on Youth Autonomy</h1>
+            <p class="subtitle">Comprehensive Analysis Dashboard - Academic Research Study</p>
+        </header>
+
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="filters">
+            <div class="filter-title">Interactive Filters</div>
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label for="genderFilter">Gender</label>
+                    <select id="genderFilter">
+                        <option value="all">All Genders</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="schoolFilter">School Level</label>
+                    <select id="schoolFilter">
+                        <option value="all">All Levels</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="ageFilter">Age Group</label>
+                    <select id="ageFilter">
+                        <option value="all">All Ages</option>
+                        <option value="13-15">13-15 years</option>
+                        <option value="16-18">16-18 years</option>
+                        <option value="19-22">19-22 years</option>
+                    </select>
+                </div>
+            </div>
+            <button onclick="applyFilters()">Apply Filters</button>
+            <button onclick="resetFilters()" style="background: #6c757d; margin-left: 10px;">Reset</button>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">1. AI Prompts vs Decision Latency</div>
+            <div id="chart1"></div>
+            <div class="chart-insight">
+                <strong>Key Insight:</strong> This scatter plot reveals the relationship between daily AI prompt usage and decision-making speed. Higher AI dependency may correlate with longer decision times, suggesting potential impacts on autonomous decision-making abilities.
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">2. AI Usage Minutes vs Verification Behavior</div>
+            <div id="chart2"></div>
+            <div class="chart-insight">
+                <strong>Key Insight:</strong> Analysis of AI usage duration against information verification tendencies. Lower verification scores with higher AI usage may indicate over-reliance on automated responses without critical evaluation.
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">3. Automation Bias: Heavy vs Low AI Users</div>
+            <div id="chart3"></div>
+            <div class="chart-insight">
+                <strong>Key Insight:</strong> Comparison of automation bias between high-frequency and low-frequency AI users. Heavy users (>30 daily prompts) show distinct bias patterns compared to minimal users (<20 prompts), revealing behavioral differences.
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">4. Screen Time Impact on Attention & Fatigue</div>
+            <div id="chart4"></div>
+            <div class="chart-insight">
+                <strong>Key Insight:</strong> Multi-dimensional analysis showing how screen time affects both attention span and fatigue levels. Bubble size represents AI usage intensity, revealing compound effects of digital engagement.
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">5. Autonomy Risk Pattern Analysis</div>
+            <div id="chart5"></div>
+            <div class="chart-insight">
+                <strong>Key Insight:</strong> Comprehensive risk assessment using automation bias, verification behavior, decision latency, and confidence metrics. Color intensity indicates risk level - darker shades suggest higher autonomy concerns requiring attention.
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 Youth AI Impact Study | Interactive Dashboard for Academic Research</p>
+            <p style="margin-top: 10px;">Deploy to GitHub Pages: Simply upload this file to your repository</p>
+        </footer>
+    </div>
+
+    <script>
+        // Embedded CSV Data
+        const csvData = `Youth_ID,Age,Gender,School_Level,Daily_AI_Prompts,AI_Usage_Minutes,Days_AI_Used_Per_Week,Screen_Time_Hours,Parental_Monitoring_Level,Automation_Bias_Index,Verification_Behavior_Score,Decision_Latency_Seconds,Fatigue_Level,Attention_Score,Confidence_Independent_Decision
+1,19,Male,Middle,36,157.354,3,5.972,10,50.864,9.541,92.364,6.428,70.889,4.829
+2,16,Male,College,31,125.990,5,5.632,6,65.384,7.979,65.722,7.557,70.592,5.095
+3,20,Male,Middle,28,179.287,0,8.336,10,44.426,9.594,77.801,8.844,52.348,8.381
+4,17,Male,High,34,212.197,1,6.732,7,64.867,10.000,92.670,6.393,59.506,7.207
+5,19,Female,Middle,19,173.679,6,7.183,10,34.209,9.428,66.834,7.804,67.620,7.764
+6,22,Male,College,29,120.695,1,9.941,2,52.575,7.502,78.523,10.000,46.992,5.960
+7,15,Female,Middle,28,189.760,2,8.870,1,48.896,8.788,82.476,10.000,53.519,8.267
+8,19,Female,College,27,57.990,5,11.174,4,49.910,8.086,78.821,10.000,40.827,5.917
+9,20,Female,College,33,160.532,1,5.964,1,58.770,9.248,99.454,7.619,65.715,7.435
+10,17,Other,Middle,35,231.070,4,6.582,9,65.723,8.457,107.591,7.771,59.779,6.285`;
+
+        // Parse CSV
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = isNaN(values[i]) ? values[i] : parseFloat(values[i]);
+                });
+                return obj;
+            });
+        }
+
+        let allData = parseCSV(csvData);
+        let filteredData = [...allData];
+
+        // Initialize filters
+        function initializeFilters() {
+            const genders = [...new Set(allData.map(d => d.Gender))];
+            const schools = [...new Set(allData.map(d => d.School_Level))];
+            
+            const genderSelect = document.getElementById('genderFilter');
+            const schoolSelect = document.getElementById('schoolFilter');
+            
+            genders.forEach(gender => {
+                const option = document.createElement('option');
+                option.value = gender;
+                option.textContent = gender;
+                genderSelect.appendChild(option);
+            });
+            
+            schools.forEach(school => {
+                const option = document.createElement('option');
+                option.value = school;
+                option.textContent = school;
+                schoolSelect.appendChild(option);
+            });
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const gender = document.getElementById('genderFilter').value;
+            const school = document.getElementById('schoolFilter').value;
+            const age = document.getElementById('ageFilter').value;
+            
+            filteredData = allData.filter(d => {
+                let match = true;
+                if (gender !== 'all') match = match && d.Gender === gender;
+                if (school !== 'all') match = match && d.School_Level === school;
+                if (age !== 'all') {
+                    const [min, max] = age.split('-').map(Number);
+                    match = match && d.Age >= min && d.Age <= max;
+                }
+                return match;
+            });
+            
+            updateAllCharts();
+            updateStats();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('genderFilter').value = 'all';
+            document.getElementById('schoolFilter').value = 'all';
+            document.getElementById('ageFilter').value = 'all';
+            filteredData = [...allData];
+            updateAllCharts();
+            updateStats();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const stats = [
+                {
+                    value: filteredData.length,
+                    label: 'Total Participants'
+                },
+                {
+                    value: Math.round(filteredData.reduce((sum, d) => sum + d.Daily_AI_Prompts, 0) / filteredData.length),
+                    label: 'Avg Daily AI Prompts'
+                },
+                {
+                    value: Math.round(filteredData.reduce((sum, d) => sum + d.Automation_Bias_Index, 0) / filteredData.length),
+                    label: 'Avg Automation Bias'
+                },
+                {
+                    value: Math.round(filteredData.reduce((sum, d) => sum + d.Attention_Score, 0) / filteredData.length),
+                    label: 'Avg Attention Score'
+                }
+            ];
+            
+            document.getElementById('statsGrid').innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // Chart 1: Daily AI Prompts vs Decision Latency
+        function updateChart1() {
+            const trace = {
+                x: filteredData.map(d => d.Daily_AI_Prompts),
+                y: filteredData.map(d => d.Decision_Latency_Seconds),
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: 8,
+                    color: filteredData.map(d => d.Automation_Bias_Index),
+                    colorscale: 'Viridis',
+                    showscale: true,
+                    colorbar: {
+                        title: 'Automation<br>Bias Index'
+                    },
+                    line: {
+                        color: 'white',
+                        width: 1
+                    }
+                },
+                text: filteredData.map(d => `Age: ${d.Age}<br>Gender: ${d.Gender}<br>School: ${d.School_Level}`),
+                hovertemplate: '<b>Daily Prompts:</b> %{x}<br><b>Decision Latency:</b> %{y:.1f}s<br>%{text}<extra></extra>'
+            };
+            
+            const layout = {
+                xaxis: { title: 'Daily AI Prompts', showgrid: true, gridcolor: '#f0f0f0' },
+                yaxis: { title: 'Decision Latency (seconds)', showgrid: true, gridcolor: '#f0f0f0' },
+                hovermode: 'closest',
+                plot_bgcolor: '#ffffff',
+                paper_bgcolor: '#ffffff',
+                font: { family: 'Segoe UI, sans-serif' },
+                margin: { t: 20, r: 20, b: 60, l: 60 }
+            };
+            
+            Plotly.newPlot('chart1', [trace], layout, {responsive: true});
+        }
+
+        // Chart 2: AI Usage Minutes vs Verification Behavior
+        function updateChart2() {
+            const trace = {
+                x: filteredData.map(d => d.AI_Usage_Minutes),
+                y: filteredData.map(d => d.Verification_Behavior_Score),
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: filteredData.map(d => d.Screen_Time_Hours * 2),
+                    color: filteredData.map(d => d.Confidence_Independent_Decision),
+                    colorscale: 'Portland',
+                    showscale: true,
+                    colorbar: {
+                        title: 'Confidence in<br>Independent<br>Decisions'
+                    },
+                    opacity: 0.7,
+                    line: {
+                        color: 'white',
+                        width: 1
+                    }
+                },
+                text: filteredData.map(d => `Screen Time: ${d.Screen_Time_Hours.toFixed(1)}h<br>Age: ${d.Age}`),
+                hovertemplate: '<b>AI Usage:</b> %{x:.1f} min<br><b>Verification Score:</b> %{y:.1f}<br>%{text}<extra></extra>'
+            };
+            
+            const layout = {
+                xaxis: { title: 'AI Usage Minutes (Daily)', showgrid: true, gridcolor: '#f0f0f0' },
+                yaxis: { title: 'Verification Behavior Score', showgrid: true, gridcolor: '#f0f0f0' },
+                hovermode: 'closest',
+                plot_bgcolor: '#ffffff',
+                paper_bgcolor: '#ffffff',
+                font: { family: 'Segoe UI, sans-serif' },
+                margin: { t: 20, r: 20, b: 60, l: 60 }
+            };
+            
+            Plotly.newPlot('chart2', [trace], layout, {responsive: true});
+        }
+
+        // Chart 3: Automation Bias Distribution
+        function updateChart3() {
+            const heavyUsers = filteredData.filter(d => d.Daily_AI_Prompts > 30);
+            const lightUsers = filteredData.filter(d => d.Daily_AI_Prompts < 20);
+            
+            const trace1 = {
+                y: heavyUsers.map(d => d.Automation_Bias_Index),
+                type: 'violin',
+                name: 'Heavy Users (>30 prompts)',
+                box: { visible: true },
+                meanline: { visible: true },
+                marker: { color: '#667eea' },
+                fillcolor: '#667eea',
+                opacity: 0.6
+            };
+            
+            const trace2 = {
+                y: lightUsers.map(d => d.Automation_Bias_Index),
+                type: 'violin',
+                name: 'Light Users (<20 prompts)',
+                box: { visible: true },
+                meanline: { visible: true },
+                marker: { color: '#f093fb' },
+                fillcolor: '#f093fb',
+                opacity: 0.6
+            };
+            
+            const layout = {
+                yaxis: { title: 'Automation Bias Index', showgrid: true, gridcolor: '#f0f0f0' },
+                plot_bgcolor: '#ffffff',
+                paper_bgcolor: '#ffffff',
+                font: { family: 'Segoe UI, sans-serif' },
+                showlegend: true,
+                legend: { x: 0.5, y: 1.1, xanchor: 'center', orientation: 'h' },
+                margin: { t: 60, r: 20, b: 60, l: 60 }
+            };
+            
+            Plotly.newPlot('chart3', [trace1, trace2], layout, {responsive: true});
+        }
+
+        // Chart 4: Screen Time vs Attention & Fatigue
+        function updateChart4() {
+            const trace = {
+                x: filteredData.map(d => d.Screen_Time_Hours),
+                y: filteredData.map(d => d.Attention_Score),
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: filteredData.map(d => d.AI_Usage_Minutes / 5),
+                    color: filteredData.map(d => d.Fatigue_Level),
+                    colorscale: 'RdYlGn_r',
+                    showscale: true,
+                    colorbar: {
+                        title: 'Fatigue<br>Level'
+                    },
+                    opacity: 0.6,
+                    line: {
+                        color: 'white',
+                        width: 1
+                    }
+                },
+                text: filteredData.map(d => `AI Usage: ${d.AI_Usage_Minutes.toFixed(0)} min<br>Fatigue: ${d.Fatigue_Level.toFixed(1)}`),
+                hovertemplate: '<b>Screen Time:</b> %{x:.1f}h<br><b>Attention Score:</b> %{y:.1f}<br>%{text}<extra></extra>'
+            };
+            
+            const layout = {
+                xaxis: { title: 'Screen Time (hours/day)', showgrid: true, gridcolor: '#f0f0f0' },
+                yaxis: { title: 'Attention Score', showgrid: true, gridcolor: '#f0f0f0' },
+                hovermode: 'closest',
+                plot_bgcolor: '#ffffff',
+                paper_bgcolor: '#ffffff',
+                font: { family: 'Segoe UI, sans-serif' },
+                margin: { t: 20, r: 20, b: 60, l: 60 }
+            };
+            
+            Plotly.newPlot('chart4', [trace], layout, {responsive: true});
+        }
+
+        // Chart 5: Autonomy Risk Pattern
+        function updateChart5() {
+            // Calculate risk score
+            const dataWithRisk = filteredData.map(d => {
+                const riskScore = (
+                    (d.Automation_Bias_Index / 10) * 0.3 +
+                    ((10 - d.Verification_Behavior_Score) / 10) * 0.3 +
+                    (d.Decision_Latency_Seconds / 140) * 0.2 +
+                    ((10 - d.Confidence_Independent_Decision) / 10) * 0.2
+                ) * 100;
+                return { ...d, riskScore };
+            });
+            
+            const trace = {
+                x: dataWithRisk.map(d => d.Automation_Bias_Index),
+                y: dataWithRisk.map(d => d.Verification_Behavior_Score),
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: dataWithRisk.map(d => Math.abs(d.Decision_Latency_Seconds) / 3),
+                    color: dataWithRisk.map(d => d.riskScore),
+                    colorscale: 'Reds',
+                    showscale: true,
+                    colorbar: {
+                        title: 'Autonomy<br>Risk Score<br>(%)'
+                    },
+                    opacity: 0.7,
+                    line: {
+                        color: 'white',
+                        width: 1
+                    }
+                },
+                text: dataWithRisk.map(d => `Risk Score: ${d.riskScore.toFixed(1)}%<br>Confidence: ${d.Confidence_Independent_Decision.toFixed(1)}<br>Decision Latency: ${d.Decision_Latency_Seconds.toFixed(1)}s`),
+                hovertemplate: '<b>Automation Bias:</b> %{x:.1f}<br><b>Verification Score:</b> %{y:.1f}<br>%{text}<extra></extra>'
+            };
+            
+            const layout = {
+                xaxis: { title: 'Automation Bias Index', showgrid: true, gridcolor: '#f0f0f0' },
+                yaxis: { title: 'Verification Behavior Score', showgrid: true, gridcolor: '#f0f0f0' },
+                hovermode: 'closest',
+                plot_bgcolor: '#ffffff',
+                paper_bgcolor: '#ffffff',
+                font: { family: 'Segoe UI, sans-serif' },
+                margin: { t: 20, r: 20, b: 60, l: 60 }
+            };
+            
+            Plotly.newPlot('chart5', [trace], layout, {responsive: true});
+        }
+
+        // Update all charts
+        function updateAllCharts() {
+            updateChart1();
+            updateChart2();
+            updateChart3();
+            updateChart4();
+            updateChart5();
+        }
+
+        // Initialize dashboard
+        initializeFilters();
+        updateStats();
+        updateAllCharts();
+    </script>
+</body>
+</html>
